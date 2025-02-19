@@ -14,7 +14,13 @@ func main() {
 	http.HandleFunc("GET /health", healthHandler)
 	http.HandleFunc("GET /v1.0/user/devices", getDevicesHandle)
 	http.HandleFunc("POST /v1.0/user/devices/query", postDevicesHandle)
+	http.HandleFunc("/", other)
 	http.ListenAndServe(":8080", nil)
+}
+
+func other(w http.ResponseWriter, r *http.Request) {
+	log.Printf(r.URL.Path)
+	w.WriteHeader(http.StatusOK)
 }
 
 func getDevicesHandle(w http.ResponseWriter, r *http.Request) {

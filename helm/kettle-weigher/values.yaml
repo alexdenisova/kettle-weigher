@@ -25,7 +25,7 @@ kettleWeigher:
       cpu: 100m
   image:
     repository: ghcr.io/alexdenisova/kettle-weigher
-    pullPolicy: IfNotPresent
+    pullPolicy: Always # IfNotPresent
     tag: "latest"
   livenessPath: &livenessPath /health
   readinessPath: *livenessPath
