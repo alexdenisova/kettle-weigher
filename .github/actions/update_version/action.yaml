@@ -63,6 +63,9 @@ runs:
               release_version="$(printf '%s0' "$tag_prefix")"
             fi
           fi
+        else
+          ref="${{ github.ref }}"
+          release_version="${ref#refs/tags/}"
         fi
         printf 'release_version=%s\n' "$release_version" >> $GITHUB_OUTPUT
         printf 'stop_workflow=%s\n' "$stop_workflow" >> $GITHUB_OUTPUT

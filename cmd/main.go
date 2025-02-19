@@ -11,6 +11,7 @@ type HelloResponse struct {
 }
 
 func main() {
+	log.Printf("Starting server")
 	http.HandleFunc("GET /health", healthHandler)
 	http.HandleFunc("GET /v1.0/user/devices", getDevicesHandle)
 	http.HandleFunc("POST /v1.0/user/devices/query", postDevicesHandle)
