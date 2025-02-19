@@ -1,0 +1,14 @@
+{{- with .Values.kettleWeigher -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .name }}
+  labels:
+    {{- include "kettle-weigher.labels" $ | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-3"
+data:
+  {{- toYaml .configMapValues | nindent 2 }}
+{{- end -}}

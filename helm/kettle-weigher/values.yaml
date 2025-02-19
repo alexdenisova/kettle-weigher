@@ -1,0 +1,37 @@
+---
+registry_secret:
+  name: registrypullsecret
+  data: '{"auths":{"ghcr.io":{"username":"alexdenisova","password":"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","auth":"YWxleGRlbmlzb3ZhOmdocF9QZkdxYUM5N1h3ajdHaHRDMEREVkJiYk1PNnVwM0UwVFFxM3c="}}}'
+
+ingress:
+  enabled: true
+  host: "kettle-weigher.alexdenisova.ru"
+  className: "ingress-nginx"
+  # tls:
+  #   secretName: kettle-weigher-tls
+  #   key: ""
+  #   certificate: ""
+
+kettleWeigher:
+  name: kettle-weigher
+  replicaCount: 1
+  annotations: {}
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+  image:
+    repository: ghcr.io/alexdenisova/kettle-weigher
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  livenessPath: &livenessPath /health
+  readinessPath: *livenessPath
+  command:
+    - kettle-weigher
+  port: 8080
+  ingressPath: /
+  configMapValues: {}
+  secretValues: {}

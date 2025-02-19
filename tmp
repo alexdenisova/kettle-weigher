@@ -1,0 +1,103 @@
+package main
+
+import "fmt"
+
+type Request struct {
+	RequestID string  `json:"request_id"`
+	Payload   Payload `json:"payload"`
+}
+
+type Payload struct {
+	UserID  string   `json:"user_id"`
+	Devices []Device `json:"devices"`
+}
+
+type Device struct {
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Room        string                 `json:"room"`
+	Type        string                 `json:"type"`
+	CustomData  map[string]interface{} `json:"custom_data"`
+	Capabilities map[string]interface{} `json:"capabilities"`
+	Properties  map[string]interface{} `json:"properties"`
+	DeviceInfo  DeviceInfo             `json:"device_info"`
+}
+
+type DeviceInfo struct {
+	Manufacturer string `json:"manufacturer"`
+	Model        string `json:"model"`
+	HWVersion    string `json:"hw_version"`
+	SWVersion    string `json:"sw_version"`
+}
+
+func main() {
+	// Create an example Request instance
+	request := Request{
+		RequestID: "12345",
+		Payload: Payload{
+			UserID: "user_6789",
+			Devices: []Device{
+				{
+					ID:          "device_001",
+					Name:        "Living Room Light",
+					Description: "Smart LED light in the living room",
+					Room:        "Living Room",
+					Type:        "light",
+					CustomData: map[string]interface{}{
+						"color": "white",
+						"brightness": 75,
+					},
+					Capabilities: map[string]interface{}{
+						"on_off": map[string]interface{}{
+							"supported": true,
+						},
+						"brightness": map[string]interface{}{
+							"min": 0,
+							"max": 100,
+						},
+					},
+					Properties: map[string]interface{}{
+						"power": "on",
+						"brightness_level": 75,
+					},
+					DeviceInfo: DeviceInfo{
+						Manufacturer: "SmartHome Inc.",
+						Model:        "LED123",
+						HWVersion:    "1.0",
+						SWVersion:    "2.1.3",
+					},
+				},
+				{
+					ID:          "device_002",
+					Name:        "Kitchen Thermostat",
+					Description: "Smart thermostat in the kitchen",
+					Room:        "Kitchen",
+					Type:        "thermostat",
+					CustomData: map[string]interface{}{
+						"temperature_unit": "Celsius",
+					},
+					Capabilities: map[string]interface{}{
+						"temperature_control": map[string]interface{}{
+							"min": 10,
+							"max": 30,
+						},
+					},
+					Properties: map[string]interface{}{
+						"current_temperature": 22,
+						"target_temperature":  20,
+					},
+					DeviceInfo: DeviceInfo{
+						Manufacturer: "SmartHome Inc.",
+						Model:        "THERMO456",
+						HWVersion:    "1.2",
+						SWVersion:    "3.0.1",
+					},
+				},
+			},
+		},
+	}
+
+	// Print the example instance
+	fmt.Printf("%+v\n", request)
+}
