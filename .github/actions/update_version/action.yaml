@@ -29,9 +29,9 @@ runs:
       with:
         filters: |
           publish:
-            - 'crates/**'
-            - 'src/**'
-            - 'Cargo.*'
+            - 'cmd/**'
+            - 'go.mod'
+            - 'go.sum'
             - 'Dockerfile'
     - name: Compute Version
       shell: bash
