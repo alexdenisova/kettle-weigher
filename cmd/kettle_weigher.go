@@ -97,7 +97,7 @@ func (weigher *KettleWeigher) getKettleIsOn(token string, capability_type string
 
 func (weigher *KettleWeigher) changeKettleState(new_value bool, token string) UpdateDeviceResult {
 	cap := weigher.on_off_capability_info()
-	getDeviceState(token, weigher.kettle_id, cap.Type)
+	weigher.getKettleIsOn(token, cap.Type)
 	defer weigher.mu.Unlock()
 	weigher.mu.Lock()
 	if weigher.kettleIsOn == new_value {
