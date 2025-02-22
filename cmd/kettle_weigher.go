@@ -96,6 +96,8 @@ func (weigher *KettleWeigher) getKettleIsOn(token string, capability_type string
 }
 
 func (weigher *KettleWeigher) changeKettleState(new_value bool, token string) UpdateDeviceResult {
+	cap := weigher.on_off_capability_info()
+	getDeviceState(token, weigher.kettle_id, cap.Type)
 	defer weigher.mu.Unlock()
 	weigher.mu.Lock()
 	if weigher.kettleIsOn == new_value {
@@ -104,7 +106,6 @@ func (weigher *KettleWeigher) changeKettleState(new_value bool, token string) Up
 	if new_value && weigher.water_level < weigher.min_water_level {
 		return UpdateDeviceResult{status: NotEnoughWater, msg: fmt.Sprintf("not enough water, kettle needs to be at least %f%% filled", weigher.min_water_level)}
 	}
-	cap := weigher.on_off_capability_info()
 	cap.State.Value = new_value
 	state, err := changeDeviceState(token, weigher.kettle_id, CPToActionRequest(cap))
 	if err != nil {
