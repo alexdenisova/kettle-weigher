@@ -25,7 +25,7 @@ type UpdateDeviceResult struct {
 }
 
 type CapabilityProperties interface {
-	capabilities() []CapabilityProperty
+	capabilities(token string) []CapabilityProperty
 	properties() []CapabilityProperty
 	updateCapability(instance string, value interface{}, token string) UpdateDeviceResult
 	updateProperty(instance string, value interface{}) UpdateDeviceResult

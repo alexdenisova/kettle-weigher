@@ -16,16 +16,22 @@ type KettleWeigher struct {
 
 type KettleWeigherError int
 
-func (weigher *KettleWeigher) capabilities() []CapabilityProperty {
-	cp := []CapabilityProperty{{
+func (weigher *KettleWeigher) on_off_capability_info() CapabilityProperty {
+	cp := CapabilityProperty{
 		Type:        "devices.capabilities.on_off",
 		Retrievable: true,
 		Reportable:  false,
 		State: DeviceState{
 			Instance: "on",
-			Value:    weigher.getKettleIsOn(),
 		},
-	}}
+	}
+	return cp
+}
+
+func (weigher *KettleWeigher) capabilities(token string) []CapabilityProperty {
+	on_off_capability := weigher.on_off_capability_info()
+	on_off_capability.State.Value = weigher.getKettleIsOn(token, on_off_capability.Type)
+	cp := []CapabilityProperty{on_off_capability}
 	return cp
 }
 
@@ -77,32 +83,39 @@ func (weigher *KettleWeigher) updateWeight(new_value float32) {
 	weigher.water_level = new_value
 }
 
-func (weigher *KettleWeigher) getKettleIsOn() bool {
-	defer weigher.mu.RUnlock()
-	weigher.mu.RLock()
+func (weigher *KettleWeigher) getKettleIsOn(token string, capability_type string) bool {
+	state, err := getDeviceState(token, weigher.kettle_id, capability_type)
+	defer weigher.mu.Unlock()
+	weigher.mu.Lock()
+	if err != nil {
+		log.Printf("Error sending request to kettle: %s", err.Error())
+	} else {
+		weigher.kettleIsOn = state.Value.(bool)
+	}
 	return weigher.kettleIsOn
 }
 
 func (weigher *KettleWeigher) changeKettleState(new_value bool, token string) UpdateDeviceResult {
+	defer weigher.mu.Unlock()
 	weigher.mu.Lock()
 	if weigher.kettleIsOn == new_value {
-		weigher.mu.Unlock()
 		return UpdateDeviceResult{status: OK}
 	}
 	if new_value && weigher.water_level < weigher.min_water_level {
-		weigher.mu.Unlock()
 		return UpdateDeviceResult{status: NotEnoughWater, msg: fmt.Sprintf("not enough water, kettle needs to be at least %f%% filled", weigher.min_water_level)}
 	}
-	weigher.kettleIsOn = new_value
-	weigher.mu.Unlock()
-	err := changeDeviceState(token, weigher.kettle_id, CPToActionRequest(weigher.capabilities()[0]))
+	cap := weigher.on_off_capability_info()
+	cap.State.Value = new_value
+	state, err := changeDeviceState(token, weigher.kettle_id, CPToActionRequest(cap))
 	if err != nil {
 		log.Printf("Error sending request to kettle: %s", err.Error())
-		weigher.mu.Lock()
-		weigher.kettleIsOn = !new_value
-		weigher.mu.Unlock()
 		return UpdateDeviceResult{status: DeviceUnreachable, msg: err.Error()}
 	}
-	log.Printf("Successfully turned on kettle")
+	weigher.kettleIsOn = state.Value.(bool)
+	if weigher.kettleIsOn {
+		log.Printf("Successfully turned on kettle")
+	} else {
+		log.Printf("Successfully turned off kettle")
+	}
 	return UpdateDeviceResult{status: OK}
 }

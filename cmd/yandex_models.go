@@ -71,13 +71,14 @@ type ActionRequest struct {
 	State StateResponse `json:"state"`
 }
 
-type ChangeDevicesStateResponse struct {
-	Status    string                      `json:"status"`
-	RequestID string                      `json:"request_id"`
-	Devices   []ChangeDeviceStateResponse `json:"devices"`
+type DevicesStateResponse struct {
+	Status    string                `json:"status"`
+	RequestID string                `json:"request_id"`
+	Devices   []DeviceStateResponse `json:"devices"`
 }
 
-type ChangeDeviceStateResponse struct {
+type DeviceStateResponse struct {
+	Status       string               `json:"status,omitempty"`
 	ID           string               `json:"id"`
 	Capabilities []CapabilityResponse `json:"capabilities"`
 }

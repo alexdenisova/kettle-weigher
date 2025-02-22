@@ -88,7 +88,8 @@ func (state *AppState) getDevicesHandle(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
-	resp := state.toGetDevicesResponse()
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	resp := state.toGetDevicesResponse(token)
 	resp.RequestID = r.Header.Get("X-Request-Id")
 	jsonResp, _ := json.Marshal(resp)
 	w.Write(jsonResp)
@@ -99,8 +100,8 @@ func (state *AppState) queryDevicesHandle(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 
 	log.Printf("headers: %v", r.Header)
-
-	resp := state.toQueryDeviceResponse()
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	resp := state.toQueryDeviceResponse(token)
 	resp.RequestID = r.Header.Get("X-Request-Id")
 	jsonResp, _ := json.Marshal(resp)
 	w.Write(jsonResp)
@@ -182,10 +183,10 @@ func (state *AppState) changeDevicesStateHandle(w http.ResponseWriter, r *http.R
 	w.Write(jsonResp)
 }
 
-func (state *AppState) toQueryDeviceResponse() QueryDevicesResponse {
+func (state *AppState) toQueryDeviceResponse(token string) QueryDevicesResponse {
 	devices := []DeviceResponse{}
 	for device_id, device := range state.Devices {
-		capabilities := CPListToMapList(device.Characteristics.capabilities())
+		capabilities := CPListToMapList(device.Characteristics.capabilities(token))
 		properties := CPListToMapList(device.Characteristics.properties())
 		devices = append(devices, DeviceResponse{
 			ID:           device_id,
@@ -203,10 +204,10 @@ func (state *AppState) toQueryDeviceResponse() QueryDevicesResponse {
 	}
 }
 
-func (state *AppState) toGetDevicesResponse() GetDevicesResponse {
+func (state *AppState) toGetDevicesResponse(token string) GetDevicesResponse {
 	devices := []DeviceResponse{}
 	for device_id, device := range state.Devices {
-		capabilities := CPListToMapList(device.Characteristics.capabilities())
+		capabilities := CPListToMapList(device.Characteristics.capabilities(token))
 		properties := CPListToMapList(device.Characteristics.properties())
 		devices = append(devices, DeviceResponse{
 			ID:           device_id,
