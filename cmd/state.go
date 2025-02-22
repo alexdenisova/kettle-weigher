@@ -17,7 +17,17 @@ type AppState struct {
 	Devices map[string]*Device
 }
 
-func (state *AppState) patchDeviceState(w http.ResponseWriter, r *http.Request) {
+func (state *AppState) unlinkUserHandle(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	resp := make(map[string]string)
+	resp["request_id"] = r.Header.Get("X-Request-Id")
+	jsonResp, _ := json.Marshal(resp)
+	w.Write(jsonResp)
+}
+
+func (state *AppState) patchDeviceStateHandle(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var payload DeviceStatePayload
 	err := decoder.Decode(&payload)
