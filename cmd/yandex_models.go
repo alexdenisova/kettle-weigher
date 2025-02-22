@@ -56,3 +56,33 @@ type ActionResultResponse struct {
 	ErrorCode    string `json:"error_code,omitempty"`
 	ErrorMessage string `json:"error_message,omitempty"`
 }
+
+type ChangeDevicesStateRequest struct {
+	Devices []ChangeDeviceStateRequest `json:"devices"`
+}
+
+type ChangeDeviceStateRequest struct {
+	ID      string          `json:"id"`
+	Actions []ActionRequest `json:"actions"`
+}
+
+type ActionRequest struct {
+	Type  string        `json:"type"`
+	State StateResponse `json:"state"`
+}
+
+type ChangeDevicesStateResponse struct {
+	Status    string                      `json:"status"`
+	RequestID string                      `json:"request_id"`
+	Devices   []ChangeDeviceStateResponse `json:"devices"`
+}
+
+type ChangeDeviceStateResponse struct {
+	ID           string               `json:"id"`
+	Capabilities []CapabilityResponse `json:"capabilities"`
+}
+
+type CapabilityResponse struct {
+	Type  string        `json:"type"`
+	State StateResponse `json:"state"`
+}

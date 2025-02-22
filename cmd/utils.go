@@ -16,7 +16,7 @@ func writeError(w *http.ResponseWriter, msg string) {
 	(*w).Write(jsonResp)
 }
 
-func CPListtoMapList(cp_list []CapabilityProperty) []map[string]interface{} {
+func CPListToMapList(cp_list []CapabilityProperty) []map[string]interface{} {
 	m := []map[string]interface{}{}
 	for _, cp := range cp_list {
 		result := map[string]interface{}{}
@@ -28,4 +28,14 @@ func CPListtoMapList(cp_list []CapabilityProperty) []map[string]interface{} {
 		m = append(m, result)
 	}
 	return m
+}
+
+func CPToActionRequest(cp CapabilityProperty) ActionRequest {
+	return ActionRequest{
+		Type: cp.Type,
+		State: StateResponse{
+			Instance: cp.State.Instance,
+			Value:    cp.State.Value,
+		},
+	}
 }

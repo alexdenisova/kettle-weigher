@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
@@ -62,17 +63,19 @@ func (state *AppState) patchDeviceStateHandle(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	var result UpdateDeviceResult
 	switch payload.Type {
 	case "capability":
-		// err = device.Characteristics.updateCapability(payload.Instance, *payload.Value)
+		// result = device.Characteristics.updateCapability(payload.Instance, *payload.Value)
 	case "property":
-		err = device.Characteristics.updateProperty(payload.Instance, *payload.Value)
+		result = device.Characteristics.updateProperty(payload.Instance, *payload.Value)
 	default:
 		writeError(&w, "Error parsing body: 'type' must be 'capability' or 'property'")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
-	if err != nil {
+	if result.status != OK {
+		writeError(&w, result.msg)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -113,6 +116,7 @@ func (state *AppState) changeDevicesStateHandle(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 	devices_response := []DeviceResponse{}
 	for _, device := range payload.Payload.Devices {
 		state_device, found := state.Devices[device.ID]
@@ -139,14 +143,25 @@ func (state *AppState) changeDevicesStateHandle(w http.ResponseWriter, r *http.R
 				return
 			}
 
-			err = state_device.Characteristics.updateCapability(device_state.Instance, device_state.Value)
+			result := state_device.Characteristics.updateCapability(device_state.Instance, device_state.Value, token)
 			var new_state StateResponse
 			new_state.Instance = state["instance"].(string)
-			if err == nil {
+			if result.status == OK {
 				new_state.ActionResult.Status = "DONE"
 			} else {
 				new_state.ActionResult.Status = "ERROR"
-				new_state.ActionResult.ErrorCode = "NOT_ENOUGH_WATER" // DEVICE_UNREACHABLE https://yandex.ru/dev/dialogs/smart-home/doc/ru/concepts/response-codes#codes
+				switch result.status {
+				case InvalidValue:
+					new_state.ActionResult.ErrorCode = "INVALID_VALUE"
+				case InvalidAction:
+					new_state.ActionResult.ErrorCode = "INVALID_ACTION"
+				case NotEnoughWater:
+					new_state.ActionResult.ErrorCode = "NOT_ENOUGH_WATER"
+				case DeviceUnreachable:
+					new_state.ActionResult.ErrorCode = "DEVICE_UNREACHABLE"
+				case UnknownError:
+					new_state.ActionResult.ErrorCode = "INTERNAL_ERROR"
+				}
 			}
 
 			cap_response := make(map[string]interface{})
@@ -170,8 +185,8 @@ func (state *AppState) changeDevicesStateHandle(w http.ResponseWriter, r *http.R
 func (state *AppState) toQueryDeviceResponse() QueryDevicesResponse {
 	devices := []DeviceResponse{}
 	for device_id, device := range state.Devices {
-		capabilities := CPListtoMapList(device.Characteristics.capabilities())
-		properties := CPListtoMapList(device.Characteristics.properties())
+		capabilities := CPListToMapList(device.Characteristics.capabilities())
+		properties := CPListToMapList(device.Characteristics.properties())
 		devices = append(devices, DeviceResponse{
 			ID:           device_id,
 			Capabilities: capabilities,
@@ -191,8 +206,8 @@ func (state *AppState) toQueryDeviceResponse() QueryDevicesResponse {
 func (state *AppState) toGetDevicesResponse() GetDevicesResponse {
 	devices := []DeviceResponse{}
 	for device_id, device := range state.Devices {
-		capabilities := CPListtoMapList(device.Characteristics.capabilities())
-		properties := CPListtoMapList(device.Characteristics.properties())
+		capabilities := CPListToMapList(device.Characteristics.capabilities())
+		properties := CPListToMapList(device.Characteristics.properties())
 		devices = append(devices, DeviceResponse{
 			ID:           device_id,
 			Name:         device.Name,

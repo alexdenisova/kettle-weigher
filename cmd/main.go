@@ -3,13 +3,29 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/spf13/viper"
 )
 
+func getEnv() *viper.Viper {
+	env := viper.New()
+	env.SetEnvPrefix("KW_")
+	env.BindEnv("min_water_level") // KW__MIN_WATER_LEVEL
+	env.SetDefault("min_water_level", "20")
+	env.BindEnv("kettle_id") // KW__KETTLE_ID
+	return env
+}
+
 func main() {
+	env := getEnv()
+
 	user_id := "alex"
 	devices := map[string]*Device{}
 
-	kettle_weigher := KettleWeigher{}
+	kettle_weigher := KettleWeigher{
+		kettle_id:       env.GetString("kettle_id"),
+		min_water_level: float32(env.GetFloat64("min_water_level")),
+	}
 	kettle_weigher_info := Device{
 		Name:            "Весы для чайника",
 		Description:     "Измеряет вес чайника с водой",

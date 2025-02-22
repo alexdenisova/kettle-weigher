@@ -9,11 +9,26 @@ type Device struct {
 	DeviceInfo      *DeviceInfo
 }
 
+// DeviceError.status possible values
+const (
+	OK = iota
+	InvalidAction
+	InvalidValue
+	UnknownError
+	DeviceUnreachable
+	NotEnoughWater
+)
+
+type UpdateDeviceResult struct {
+	status int
+	msg    string
+}
+
 type CapabilityProperties interface {
 	capabilities() []CapabilityProperty
 	properties() []CapabilityProperty
-	updateCapability(instance string, value interface{}) error
-	updateProperty(instance string, value interface{}) error
+	updateCapability(instance string, value interface{}, token string) UpdateDeviceResult
+	updateProperty(instance string, value interface{}) UpdateDeviceResult
 }
 
 type CapabilityProperty struct {
