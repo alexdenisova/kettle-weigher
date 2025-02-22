@@ -80,5 +80,6 @@ func changeDeviceState(token string, device_id string, action ActionRequest) (St
 		resp.Devices[0].Capabilities[0].State.ActionResult.Status != "DONE" {
 		return StateResponse{}, fmt.Errorf("unknown error")
 	}
+	log.Printf("Kettle response: %+v", resp)
 	return action.State, nil
 }
