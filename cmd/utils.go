@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -20,7 +21,9 @@ func CPListtoMapList(cp_list []CapabilityProperty) []map[string]interface{} {
 	for _, cp := range cp_list {
 		result := map[string]interface{}{}
 		mapstructure.Decode(cp, &result)
-		result["parameters"] = cp.State.toParameters()
+		if strings.Contains(cp.Type, "properties") {
+			result["parameters"] = cp.State.toParameters()
+		}
 		result["state"] = cp.State.toState()
 		m = append(m, result)
 	}

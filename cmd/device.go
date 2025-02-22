@@ -24,9 +24,9 @@ type CapabilityProperty struct {
 }
 
 type DeviceState struct {
-	Instance string  `mapstructure:"instance"`
-	Value    float32 `mapstructure:"value"`
-	Unit     string  `mapstructure:"unit"`
+	Instance string      `mapstructure:"instance"`
+	Value    interface{} `mapstructure:"value"`
+	Unit     string      `mapstructure:"unit"`
 }
 
 func (state DeviceState) toParameters() map[string]interface{} {

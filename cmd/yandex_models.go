@@ -5,7 +5,16 @@ type GetDevicesResponse struct {
 	Payload   Payload `json:"payload"`
 }
 
-type QueryDeviceResponse struct {
+type QueryDevicesResponse struct {
+	RequestID string  `json:"request_id"`
+	Payload   Payload `json:"payload"`
+}
+
+type ChangeDevicesRequest struct {
+	Payload Payload `json:"payload"`
+}
+
+type ChangeDevicesResponse struct {
 	RequestID string  `json:"request_id"`
 	Payload   Payload `json:"payload"`
 }
@@ -29,10 +38,19 @@ type DeviceResponse struct {
 	ErrorMessage string                   `json:"error_message,omitempty"`
 }
 
+// type CapabilityResponse struct {
+// 	Type string `json:"type"`
+// 	State 
+// }
+
+// type StateResponse struct {
+// 	Instance string  `json:"instance"`
+// 	Value    float32 `json:"value"`
+// }
+
 type DeviceInfoResponse struct {
 	Manufacturer string `json:"manufacturer,omitempty"`
 	Model        string `json:"model,omitempty"`
 	HWVersion    string `json:"hw_version,omitempty"`
 	SWVersion    string `json:"sw_version,omitempty"`
 }
-

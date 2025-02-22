@@ -30,6 +30,7 @@ func main() {
 	}
 	log.Printf("Starting server")
 	http.HandleFunc("GET /health", healthHandler)
+	http.HandleFunc("GET /v1.0", healthHandler)
 	http.HandleFunc("PATCH /v1.0/user/device/state", app_state.patchDeviceState)
 	http.HandleFunc("GET /v1.0/user/devices", app_state.getDevicesHandle)
 	http.HandleFunc("POST /v1.0/user/devices/query", app_state.queryDevicesHandle)

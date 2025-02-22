@@ -92,7 +92,30 @@ func (state *AppState) queryDevicesHandle(w http.ResponseWriter, r *http.Request
 	w.Write(jsonResp)
 }
 
-func (state *AppState) toQueryDeviceResponse() QueryDeviceResponse {
+// func (state *AppState) changeDevicesHandle(w http.ResponseWriter, r *http.Request) {
+// 	decoder := json.NewDecoder(r.Body)
+// 	var payload ChangeDevicesRequest
+// 	err := decoder.Decode(&payload)
+// 	if err != nil {
+// 		writeError(&w, fmt.Sprintf("Error parsing body: %s", err))
+// 		w.WriteHeader(http.StatusUnprocessableEntity)
+// 		return
+// 	}
+
+// 	for _, device := range payload.Payload.Devices {
+// 		state_device, found := state.Devices[device.ID]
+// 		if !found {
+// 			writeError(&w, fmt.Sprintf("Device ID %s not found", device.ID))
+// 			w.WriteHeader(http.StatusNotFound)
+// 			return
+// 		}
+// 		for _, cap := range device.Capabilities {
+// 			state_device.Characteristics.updateCapability(cap.)
+// 		}
+// 	}
+// }
+
+func (state *AppState) toQueryDeviceResponse() QueryDevicesResponse {
 	devices := []DeviceResponse{}
 	for device_id, device := range state.Devices {
 		capabilities := CPListtoMapList(device.Characteristics.capabilities())
@@ -106,7 +129,7 @@ func (state *AppState) toQueryDeviceResponse() QueryDeviceResponse {
 		})
 	}
 
-	return QueryDeviceResponse{
+	return QueryDevicesResponse{
 		Payload: Payload{
 			Devices: devices,
 		},

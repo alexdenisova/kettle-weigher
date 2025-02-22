@@ -6,13 +6,21 @@ import (
 )
 
 type KettleWeigher struct {
-	weight float32
-	// KettleIsOn bool
-	mu sync.RWMutex
+	weight     float32
+	kettleIsOn bool
+	mu         sync.RWMutex
 }
 
 func (weigher *KettleWeigher) capabilities() []CapabilityProperty {
-	return []CapabilityProperty{}
+	return []CapabilityProperty{{
+		Type:        "devices.capabilities.on_off",
+		Retrievable: true,
+		Reportable:  false,
+		State: DeviceState{
+			Instance: "on",
+			Value:    weigher.getKettleIsOn(),
+		},
+	}}
 }
 
 func (weigher *KettleWeigher) properties() []CapabilityProperty {
@@ -34,7 +42,7 @@ func (weigher *KettleWeigher) updateCapability(instance string, value float32) e
 
 func (weigher *KettleWeigher) updateProperty(instance string, value float32) error {
 	if instance != "water_level" {
-		return fmt.Errorf("Expected water_level instance")
+		return fmt.Errorf("expected water_level instance")
 	}
 	weigher.updateWeight(value)
 	return nil
@@ -51,4 +59,11 @@ func (weigher *KettleWeigher) getWeight() float32 {
 	weight := weigher.weight
 	weigher.mu.Unlock()
 	return weight
+}
+
+func (weigher *KettleWeigher) getKettleIsOn() bool {
+	weigher.mu.Lock()
+	kettleIsOn := weigher.kettleIsOn
+	weigher.mu.Unlock()
+	return kettleIsOn
 }
