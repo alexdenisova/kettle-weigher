@@ -146,6 +146,7 @@ func (state *AppState) changeDevicesStateHandle(w http.ResponseWriter, r *http.R
 			}
 
 			result := state_device.Characteristics.updateCapability(device_state.Instance, device_state.Value, token)
+			log.Printf("Change device capability result: %+v", result)
 			var new_state StateResponse
 			new_state.Instance = state["instance"].(string)
 			if result.status == OK {
@@ -180,6 +181,7 @@ func (state *AppState) changeDevicesStateHandle(w http.ResponseWriter, r *http.R
 	var resp ChangeDevicesResponse
 	resp.RequestID = r.Header.Get("X-Request-Id")
 	resp.Payload.Devices = devices_response
+	log.Printf("My change device response: %+v", resp)
 	jsonResp, _ := json.Marshal(resp)
 	w.Write(jsonResp)
 }
