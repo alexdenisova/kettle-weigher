@@ -37,6 +37,7 @@ func getDeviceState(token string, device_id string, capability_type string) (Sta
 	if resp.Status != "ok" {
 		return StateResponse{}, fmt.Errorf("unknown error")
 	}
+	log.Printf("Get kettle response: %+v", resp)
 	for _, cap := range resp.Capabilities {
 		if cap.Type == capability_type {
 			return cap.State, nil
@@ -80,6 +81,6 @@ func changeDeviceState(token string, device_id string, action ActionRequest) (St
 		resp.Devices[0].Capabilities[0].State.ActionResult.Status != "DONE" {
 		return StateResponse{}, fmt.Errorf("unknown error")
 	}
-	log.Printf("Kettle response: %+v", resp)
+	log.Printf("Post kettle response: %+v", resp)
 	return action.State, nil
 }
