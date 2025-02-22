@@ -116,6 +116,7 @@ func (state *AppState) changeDevicesStateHandle(w http.ResponseWriter, r *http.R
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
+	log.Printf("Change device request: %+v", payload)
 
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 	devices_response := []DeviceResponse{}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 
@@ -12,6 +13,7 @@ func writeError(w *http.ResponseWriter, msg string) {
 	err_msg := ErrorMessage{
 		Message: msg,
 	}
+	log.Printf("Error: %s", msg)
 	jsonResp, _ := json.Marshal(err_msg)
 	(*w).Write(jsonResp)
 }
