@@ -35,3 +35,4 @@ func main() {
 	http.HandleFunc("POST /v1.0/user/devices/query", app_state.postDevicesHandle)
 	http.ListenAndServe(":8080", nil)
 }
+
