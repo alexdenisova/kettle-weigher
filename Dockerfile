@@ -1,26 +1,25 @@
-ARG ALPINE_VERSION="3.16"
-FROM alpine:${ALPINE_VERSION}
+ARG VERSION="3.16"
+FROM alpine:${VERSION} AS final
+
+LABEL org.opencontainers.image.source = "https://github.com/alexdenisova/kettle-weigher"
+
+ARG USER="user"
+ARG HOME="/app"
+ARG UID="1000"
+ARG GID="1000"
+RUN \
+  addgroup --gid "${GID}" "${USER}" \
+  ; adduser --disabled-password --gecos "" --home "${HOME}" --ingroup "${USER}" --uid "${UID}" "${USER}"
 
 RUN \
   apk update \
-  && apk --no-cache add vim \
+  && apk --no-cache add busybox-extras curl jq vim \
   && rm -rf /var/cache/apk/* /tmp/*
 
-ARG GOLANG_VERSION="1.23.1"
-RUN \
-  wget https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz \
-  && tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz \
-  && rm -f go${GOLANG_VERSION}.linux-amd64.tar.gz
+COPY dist/bin/* /bin/
+RUN chmod +x /bin/*
 
-ENV PATH=/usr/local/go/bin:${PATH}
-
-WORKDIR /workspace
-COPY cmd/ ./cmd
-COPY go.mod go.sum ./
-RUN \
-  cd cmd \
-  && go build -o kettle-weigher . \
-  && mv kettle-weigher /usr/local/bin/kettle-weigher \
-  && chmod 0755 /usr/local/bin/kettle-weigher
-
-ENTRYPOINT [""]
+USER ${USER}
+EXPOSE 8080/tcp
+WORKDIR ${HOME}
+ENTRYPOINT ["kettle-weigher"]
