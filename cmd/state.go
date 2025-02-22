@@ -9,7 +9,6 @@ import (
 	"reflect"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/mitchellh/mapstructure"
 )
 
 type AppState struct {
@@ -81,23 +80,16 @@ func (state *AppState) getDevicesHandle(w http.ResponseWriter, r *http.Request) 
 	w.Write(jsonResp)
 }
 
-func (state *AppState) postDevicesHandle(w http.ResponseWriter, r *http.Request) {
+func (state *AppState) queryDevicesHandle(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+
+	log.Printf("headers: %v", r.Header)
 
 	resp := state.toQueryDeviceResponse()
 	resp.RequestID = r.Header.Get("X-Request-Id")
 	jsonResp, _ := json.Marshal(resp)
-	log.Printf("response: %v", string(jsonResp[:]))
 	w.Write(jsonResp)
-}
-
-func writeError(w *http.ResponseWriter, msg string) {
-	err_msg := ErrorMessage{
-		Message: msg,
-	}
-	jsonResp, _ := json.Marshal(err_msg)
-	(*w).Write(jsonResp)
 }
 
 func (state *AppState) toQueryDeviceResponse() QueryDeviceResponse {
@@ -151,16 +143,4 @@ func (state *AppState) toGetDevicesResponse() GetDevicesResponse {
 			Devices: devices,
 		},
 	}
-}
-
-func CPListtoMapList(cp_list []CapabilityProperty) []map[string]interface{} {
-	m := []map[string]interface{}{}
-	for _, cp := range cp_list {
-		result := map[string]interface{}{}
-		mapstructure.Decode(cp, &result)
-		result["parameters"] = cp.State.toParameters()
-		result["state"] = cp.State.toState()
-		m = append(m, result)
-	}
-	return m
 }
