@@ -12,8 +12,8 @@ type Device struct {
 type CapabilityProperties interface {
 	capabilities() []CapabilityProperty
 	properties() []CapabilityProperty
-	updateCapability(instance string, value float32) error
-	updateProperty(instance string, value float32) error
+	updateCapability(instance string, value interface{}) error
+	updateProperty(instance string, value interface{}) error
 }
 
 type CapabilityProperty struct {

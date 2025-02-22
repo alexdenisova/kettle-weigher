@@ -36,22 +36,27 @@ func (weigher *KettleWeigher) properties() []CapabilityProperty {
 	}}
 }
 
-func (weigher *KettleWeigher) updateCapability(instance string, value float32) error {
-	return nil
-}
-
-func (weigher *KettleWeigher) updateProperty(instance string, value float32) error {
-	if instance != "water_level" {
-		return fmt.Errorf("expected water_level instance")
+func (weigher *KettleWeigher) updateCapability(instance string, value interface{}) error {
+	if instance != "on" {
+		return fmt.Errorf("expected 'on' instance")
 	}
-	weigher.updateWeight(value)
-	return nil
+	new_value, ok := value.(bool)
+	if !ok {
+		return fmt.Errorf("'value' must be bool'")
+	}
+	return weigher.changeKettleState(new_value)
 }
 
-func (weigher *KettleWeigher) updateWeight(new_value float32) {
-	weigher.mu.Lock()
-	weigher.weight = new_value
-	weigher.mu.Unlock()
+func (weigher *KettleWeigher) updateProperty(instance string, value interface{}) error {
+	if instance != "water_level" {
+		return fmt.Errorf("expected 'water_level' instance")
+	}
+	new_value, ok := value.(float32)
+	if !ok {
+		return fmt.Errorf("'value' must be float'")
+	}
+	weigher.updateWeight(new_value)
+	return nil
 }
 
 func (weigher *KettleWeigher) getWeight() float32 {
@@ -61,9 +66,23 @@ func (weigher *KettleWeigher) getWeight() float32 {
 	return weight
 }
 
+func (weigher *KettleWeigher) updateWeight(new_value float32) {
+	weigher.mu.Lock()
+	weigher.weight = new_value
+	weigher.mu.Unlock()
+}
+
 func (weigher *KettleWeigher) getKettleIsOn() bool {
 	weigher.mu.Lock()
 	kettleIsOn := weigher.kettleIsOn
 	weigher.mu.Unlock()
 	return kettleIsOn
+}
+
+func (weigher *KettleWeigher) changeKettleState(new_value bool) error {
+	return fmt.Errorf("testing error")
+	weigher.mu.Lock()
+	weigher.kettleIsOn = new_value
+	weigher.mu.Unlock()
+	return nil
 }

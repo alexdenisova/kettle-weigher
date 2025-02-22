@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/mitchellh/mapstructure"
 )
 
 type AppState struct {
@@ -53,7 +54,7 @@ func (state *AppState) patchDeviceState(w http.ResponseWriter, r *http.Request) 
 
 	switch payload.Type {
 	case "capability":
-		err = device.Characteristics.updateCapability(payload.Instance, *payload.Value)
+		// err = device.Characteristics.updateCapability(payload.Instance, *payload.Value)
 	case "property":
 		err = device.Characteristics.updateProperty(payload.Instance, *payload.Value)
 	default:
@@ -92,28 +93,69 @@ func (state *AppState) queryDevicesHandle(w http.ResponseWriter, r *http.Request
 	w.Write(jsonResp)
 }
 
-// func (state *AppState) changeDevicesHandle(w http.ResponseWriter, r *http.Request) {
-// 	decoder := json.NewDecoder(r.Body)
-// 	var payload ChangeDevicesRequest
-// 	err := decoder.Decode(&payload)
-// 	if err != nil {
-// 		writeError(&w, fmt.Sprintf("Error parsing body: %s", err))
-// 		w.WriteHeader(http.StatusUnprocessableEntity)
-// 		return
-// 	}
+func (state *AppState) changeDevicesStateHandle(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var payload ChangeDevicesRequest
+	err := decoder.Decode(&payload)
+	if err != nil {
+		writeError(&w, fmt.Sprintf("Error parsing body: %s", err))
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return
+	}
 
-// 	for _, device := range payload.Payload.Devices {
-// 		state_device, found := state.Devices[device.ID]
-// 		if !found {
-// 			writeError(&w, fmt.Sprintf("Device ID %s not found", device.ID))
-// 			w.WriteHeader(http.StatusNotFound)
-// 			return
-// 		}
-// 		for _, cap := range device.Capabilities {
-// 			state_device.Characteristics.updateCapability(cap.)
-// 		}
-// 	}
-// }
+	devices_response := []DeviceResponse{}
+	for _, device := range payload.Payload.Devices {
+		state_device, found := state.Devices[device.ID]
+		if !found {
+			writeError(&w, fmt.Sprintf("Device ID %s not found", device.ID))
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		device_response := DeviceResponse{ID: device.ID}
+		var capabilities []map[string]interface{}
+		for idx, cap := range device.Capabilities {
+			state_map, found := cap["state"]
+			state, ok := state_map.(map[string]interface{})
+			if !found || !ok {
+				writeError(&w, fmt.Sprintf("Missing field 'state' in capability %d", idx))
+				w.WriteHeader(http.StatusUnprocessableEntity)
+				return
+			}
+			var device_state StateResponse
+			err := mapstructure.Decode(state, &device_state)
+			if err != nil {
+				writeError(&w, fmt.Sprintf("Field 'state' in capability %d has unexpected format", idx))
+				w.WriteHeader(http.StatusUnprocessableEntity)
+				return
+			}
+
+			err = state_device.Characteristics.updateCapability(device_state.Instance, device_state.Value)
+			var new_state StateResponse
+			new_state.Instance = state["instance"].(string)
+			if err == nil {
+				new_state.ActionResult.Status = "DONE"
+			} else {
+				new_state.ActionResult.Status = "ERROR"
+				new_state.ActionResult.ErrorCode = "NOT_ENOUGH_WATER" // DEVICE_UNREACHABLE https://yandex.ru/dev/dialogs/smart-home/doc/ru/concepts/response-codes#codes
+			}
+
+			cap_response := make(map[string]interface{})
+			cap_response["type"] = cap["type"]
+			cap_response["state"] = new_state
+			capabilities = append(capabilities, cap_response)
+		}
+		device_response.Capabilities = capabilities
+		devices_response = append(devices_response, device_response)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	var resp ChangeDevicesResponse
+	resp.RequestID = r.Header.Get("X-Request-Id")
+	resp.Payload.Devices = devices_response
+	jsonResp, _ := json.Marshal(resp)
+	w.Write(jsonResp)
+}
 
 func (state *AppState) toQueryDeviceResponse() QueryDevicesResponse {
 	devices := []DeviceResponse{}

@@ -32,25 +32,27 @@ type DeviceResponse struct {
 	Type         string                   `json:"type,omitempty"`
 	CustomData   map[string]interface{}   `json:"custom_data,omitempty"`
 	Capabilities []map[string]interface{} `json:"capabilities,omitempty"`
-	Properties   []map[string]interface{} `json:"properties"`
+	Properties   []map[string]interface{} `json:"properties,omitempty"`
 	DeviceInfo   *DeviceInfoResponse      `json:"device_info,omitempty"`
 	ErrorCode    string                   `json:"error_code,omitempty"`
 	ErrorMessage string                   `json:"error_message,omitempty"`
 }
-
-// type CapabilityResponse struct {
-// 	Type string `json:"type"`
-// 	State 
-// }
-
-// type StateResponse struct {
-// 	Instance string  `json:"instance"`
-// 	Value    float32 `json:"value"`
-// }
 
 type DeviceInfoResponse struct {
 	Manufacturer string `json:"manufacturer,omitempty"`
 	Model        string `json:"model,omitempty"`
 	HWVersion    string `json:"hw_version,omitempty"`
 	SWVersion    string `json:"sw_version,omitempty"`
+}
+
+type StateResponse struct {
+	Instance     string               `json:"instance,omitempty"`
+	Value        interface{}          `json:"value,omitempty"`
+	ActionResult ActionResultResponse `json:"action_result,omitempty"`
+}
+
+type ActionResultResponse struct {
+	Status       string `json:"status"`
+	ErrorCode    string `json:"error_code,omitempty"`
+	ErrorMessage string `json:"error_message,omitempty"`
 }

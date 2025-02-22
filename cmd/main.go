@@ -34,5 +34,6 @@ func main() {
 	http.HandleFunc("PATCH /v1.0/user/device/state", app_state.patchDeviceState)
 	http.HandleFunc("GET /v1.0/user/devices", app_state.getDevicesHandle)
 	http.HandleFunc("POST /v1.0/user/devices/query", app_state.queryDevicesHandle)
+	http.HandleFunc("POST /v1.0/user/devices/action", app_state.changeDevicesStateHandle)
 	http.ListenAndServe(":8080", nil)
 }
