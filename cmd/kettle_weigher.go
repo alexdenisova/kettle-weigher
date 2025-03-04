@@ -81,6 +81,7 @@ func (weigher *KettleWeigher) updateWeight(new_value float32) {
 	defer weigher.mu.Unlock()
 	weigher.mu.Lock()
 	weigher.water_level = new_value
+	log.Printf("Kettle water level changed to %f", new_value)
 }
 
 func (weigher *KettleWeigher) getKettleIsOn(token string, capability_type string) bool {
