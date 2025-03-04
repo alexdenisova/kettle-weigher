@@ -11,7 +11,7 @@ func getEnv() *viper.Viper {
 	env := viper.New()
 	env.SetEnvPrefix("KW_")
 	env.BindEnv("min_water_level") // KW__MIN_WATER_LEVEL
-	env.SetDefault("min_water_level", "20")
+	env.SetDefault("min_water_level", "30")
 	env.BindEnv("kettle_id") // KW__KETTLE_ID
 	return env
 }
