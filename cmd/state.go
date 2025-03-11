@@ -11,11 +11,18 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AppState struct {
-	UserId  string
-	Devices map[string]*Device
+	UserId       string
+	Devices      map[string]*Device
+	PasswordHash []byte
+}
+
+func (state AppState) checkPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword(state.PasswordHash, []byte(password))
+	return err == nil
 }
 
 func (state *AppState) unlinkUserHandle(w http.ResponseWriter, r *http.Request) {
@@ -29,15 +36,23 @@ func (state *AppState) unlinkUserHandle(w http.ResponseWriter, r *http.Request) 
 }
 
 func (state *AppState) patchDeviceStateHandle(w http.ResponseWriter, r *http.Request) {
+	password, err := parsePassword(r.Header.Get("Authorization"))
+	if err != nil || !state.checkPassword(password) {
+		writeError(&w, "Incorrect username or password")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	var payload DeviceStatePayload
-	err := decoder.Decode(&payload)
+	err = decoder.Decode(&payload)
 	if err != nil {
 		writeError(&w, fmt.Sprintf("Error parsing body: %s", err))
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
 
+	// Validating json request body
 	validate := validator.New()
 	validate.RegisterTagNameFunc(func(field reflect.StructField) string {
 		return field.Tag.Get("json")

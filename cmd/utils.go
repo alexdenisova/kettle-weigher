@@ -1,13 +1,32 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/mitchellh/mapstructure"
 )
+
+func hashPassword(password string) []byte {
+	hashed_pass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Fatalf("Error hashing password: %s", err)
+	}
+	return hashed_pass
+}
+
+func parsePassword(basic_auth string) (string, error) {
+	basic_auth = strings.TrimPrefix(basic_auth, "Basic ")
+	basic_auth = strings.TrimSpace(basic_auth)
+	decoded, err := base64.StdEncoding.DecodeString(basic_auth)
+	password := strings.TrimPrefix(string(decoded), ":")
+	return password, err
+}
 
 func writeError(w *http.ResponseWriter, msg string) {
 	err_msg := ErrorMessage{

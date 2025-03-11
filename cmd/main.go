@@ -13,6 +13,7 @@ func getEnv() *viper.Viper {
 	env.BindEnv("min_water_level") // KW__MIN_WATER_LEVEL
 	env.SetDefault("min_water_level", "30")
 	env.BindEnv("kettle_id") // KW__KETTLE_ID
+	env.BindEnv("password")  // KW__PASSWORD
 	return env
 }
 
@@ -40,9 +41,11 @@ func main() {
 	}
 	devices["kettle-weigher"] = &kettle_weigher_info
 
+	hashed_pass := hashPassword(env.GetString("password"))
 	app_state := AppState{
-		UserId:  user_id,
-		Devices: devices,
+		UserId:       user_id,
+		Devices:      devices,
+		PasswordHash: hashed_pass,
 	}
 	log.Printf("Starting server")
 	http.HandleFunc("GET /health", healthHandler)
