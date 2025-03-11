@@ -2,7 +2,7 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 #include <HX711.h>
-#include <my_secrets.h> // Library with SECRET_SSID, SECRET_WIFI_PASSWORD
+#include <my_secrets.h>  // Library with SECRET_SSID, SECRET_WIFI_PASSWORD
 
 const uint8_t DOUT_PIN = 4;               // DOUT pin for HX711
 const uint8_t SCK_PIN = 5;                // SCK pin for HX711
@@ -16,11 +16,12 @@ const char* SSID = SECRET_SSID;
 const char* WIFI_PASSWORD = SECRET_WIFI_PASSWORD;
 
 const char* KETTLE_WEIGHER_URL = "https://kettle-weigher.alexdenisova.ru/v1.0/user/device/state";
+const char* KETTLE_WEIGHER_AUTH = SECRET_KETTLE_WEIGHER_AUTH;
 
-const uint8_t DELAY_SEC = 60;  // Time in between measurements
+const uint8_t DELAY_SEC = 5;  // Time in between measurements
 
 HX711 scale;
-float previous_water_level;
+float previous_water_level = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -38,6 +39,8 @@ void setup() {
   }
   Serial.printf("\nConnected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
+
+  updateWaterLevel(previous_water_level);
 }
 
 void loop() {
@@ -54,21 +57,9 @@ void loop() {
       }
       Serial.printf("Measured: %d%% (%.2fg)\n", water_level, weight);
       if ((water_level < previous_water_level - WATER_LEVEL_ERROR) || (previous_water_level + WATER_LEVEL_ERROR < water_level)) {
-        std::unique_ptr<BearSSL::WiFiClientSecure> client(new BearSSL::WiFiClientSecure);
-        client->setInsecure(); // Ignore SSL certificate validation
-
-        HTTPClient https;
-        https.begin(*client, KETTLE_WEIGHER_URL);
-        https.addHeader("Content-Type", "application/json");
-        String httpRequestData = String("{\"device_id\": \"kettle-weigher\",\"type\": \"property\",\"instance\": \"water_level\",\"value\": ") + water_level + "}";
-        Serial.printf("Request body: %s\n", httpRequestData.c_str());
-
-        // Send HTTP PATCH request
-        int httpResponseCode = https.PATCH(httpRequestData);
-        Serial.printf("HTTP Response code: %d\n", httpResponseCode);
-
-        https.end();
-        previous_water_level = water_level;
+        if (updateWaterLevel(water_level) >= 200) {
+          previous_water_level = water_level;
+        }
       }
     } else {
       Serial.println("Scale Disconnected");
@@ -77,4 +68,24 @@ void loop() {
     Serial.println("WiFi Disconnected");
   }
   delay(DELAY_SEC * 1000);
+}
+
+// Returns http status code
+int updateWaterLevel(uint8_t water_level) {
+  std::unique_ptr<BearSSL::WiFiClientSecure> client(new BearSSL::WiFiClientSecure);
+  client->setInsecure();  // Ignore SSL certificate validation
+
+  HTTPClient https;
+  https.begin(*client, KETTLE_WEIGHER_URL);
+  https.addHeader("Content-Type", "application/json");
+  https.addHeader("Authorization", String("Basic ") + KETTLE_WEIGHER_AUTH);
+  String httpRequestData = String("{\"device_id\": \"kettle-weigher\",\"type\": \"property\",\"instance\": \"water_level\",\"value\": ") + water_level + "}";
+  Serial.printf("Request body: %s\n", httpRequestData.c_str());
+
+  // Send HTTP PATCH request
+  int httpResponseCode = https.PATCH(httpRequestData);
+  Serial.printf("HTTP Response code: %d\n", httpResponseCode);
+
+  https.end();
+  return httpResponseCode;
 }
