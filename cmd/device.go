@@ -12,6 +12,7 @@ type Device struct {
 // DeviceError.status possible values
 const (
 	OK = iota
+	NotModified
 	InvalidAction
 	InvalidValue
 	UnknownError

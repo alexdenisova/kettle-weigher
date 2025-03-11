@@ -90,8 +90,12 @@ func (state *AppState) patchDeviceStateHandle(w http.ResponseWriter, r *http.Req
 		return
 	}
 	if result.status != OK {
-		writeError(&w, result.msg)
-		w.WriteHeader(http.StatusBadRequest)
+		if result.status == NotModified {
+			w.WriteHeader(http.StatusNotModified)
+		} else {
+			writeError(&w, result.msg)
+			w.WriteHeader(http.StatusBadRequest)
+		}
 		return
 	}
 

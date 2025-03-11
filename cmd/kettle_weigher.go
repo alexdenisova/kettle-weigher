@@ -67,6 +67,9 @@ func (weigher *KettleWeigher) updateProperty(instance string, value interface{})
 	if !ok {
 		return UpdateDeviceResult{status: InvalidValue, msg: "'value' must be float'"}
 	}
+	if weigher.getWeight() == new_value {
+		return UpdateDeviceResult{status: NotModified}
+	}
 	weigher.updateWeight(new_value)
 	return UpdateDeviceResult{status: OK}
 }
