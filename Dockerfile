@@ -9,11 +9,11 @@ ARG UID="1000"
 ARG GID="1000"
 RUN \
   addgroup --gid "${GID}" "${USER}" \
-  ; adduser --disabled-password --gecos "" --home "${HOME}" --ingroup "${USER}" --uid "${UID}" "${USER}"
+  && adduser --disabled-password --gecos "" --home "${HOME}" --ingroup "${USER}" --uid "${UID}" "${USER}"
 
 RUN \
   apk update \
-  && apk --no-cache add busybox-extras curl jq vim \
+  && apk --no-cache add busybox-extras \
   && rm -rf /var/cache/apk/* /tmp/*
 
 COPY dist/bin/* /bin/
