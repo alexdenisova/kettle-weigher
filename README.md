@@ -4,7 +4,7 @@ The purpose of this project is to prevent my disappointment of finding the kettl
 
 ## How it works
 
-The "Kettle Weigher" device measures the current weight of the kettle, calculates the amount of water in the kettle based on the total weight, and, if the amount of water has changed, sends the new value to a server deployed in Yandex Cloud at [kettle-weigher.alexdenisova.ru](kettle-weigher.alexdenisova.ru).
+The "Kettle Weigher" device measures the current weight of the kettle, calculates the amount of water in the kettle based on the total weight, and, if the amount of water has changed, sends the new value to a server deployed in Yandex Cloud at [kettle-weigher.alexdenisova.ru](https://kettle-weigher.alexdenisova.ru).
 
 The server stores the last received value of the amount of water, as well as the minimum required amount needed to turn on the kettle. Through the server API, you can interact with the kettle — receive information about its current state and turn it on or off. To interact with the server API, authorization with the Yandex Oauth token is required.
 
@@ -25,5 +25,5 @@ In Russian, I ask "Alisa" to turn on the kettle. She tells me that there is not 
 <p float="left">
     <img src="media/kettle-weigher.jpg" width="150" >
     <img src="media/scale.jpg" width="85" >
-    <img src="media/kicad.png" width="150">
+    <img src="media/kicad.png" width="160">
 </p>
