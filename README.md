@@ -18,7 +18,7 @@ In summary, when asking "Alisa" to turn on the kettle, she will send a request t
 
 In Russian, I ask "Alisa" to turn on the kettle. She tells me that there is not enough water and that I should add some and try again. After I add more water and ask again, she turns the kettle on.
 
-<video controls src="media/alisa.mp4" title="alisa"></video>
+https://github.com/user-attachments/assets/25276d6d-9977-403e-928d-f42c129b596c
 
 ## Photos
 
