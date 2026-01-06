@@ -4,8 +4,8 @@
 #include <HX711.h>
 #include <my_secrets.h>  // Library with SECRET_SSID, SECRET_WIFI_PASSWORD
 
-const uint8_t DOUT_PIN = 4;               // DOUT pin for HX711
-const uint8_t SCK_PIN = 5;                // SCK pin for HX711
+const uint8_t DOUT_PIN = 4;               // DOUT GPIO pin for HX711
+const uint8_t SCK_PIN = 5;                // SCK GPIO pin for HX711
 const float CALIBRATION_FACTOR = -24.83;  // Scale calibration factor
 const float MAX_WATER_ML = 1700;          // The maximum amount of water the kettle can hold in ml
 const uint8_t MEASUREMENT_AMOUNT = 10;    // The number of measurements to take before calculating average
