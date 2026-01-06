@@ -10,10 +10,10 @@ import (
 	"net/url"
 )
 
-const device_api_url string = "https://api.iot.yandex.net/v1.0/devices/"
+const DEVICE_API_URL string = "https://api.iot.yandex.net/v1.0/devices/"
 
 func getDeviceState(token string, device_id string, capability_type string) (StateResponse, error) {
-	base_url, _ := url.ParseRequestURI(device_api_url)
+	base_url, _ := url.ParseRequestURI(DEVICE_API_URL)
 	req, _ := http.NewRequest("GET", base_url.JoinPath(device_id).String(), nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
@@ -34,9 +34,6 @@ func getDeviceState(token string, device_id string, capability_type string) (Sta
 	if err != nil {
 		return StateResponse{}, fmt.Errorf("error parsing body: %s", err)
 	}
-	if resp.Status != "ok" {
-		return StateResponse{}, fmt.Errorf("unknown error")
-	}
 	log.Printf("Get kettle response: %+v", resp)
 	for _, cap := range resp.Capabilities {
 		if cap.Type == capability_type {
@@ -47,7 +44,7 @@ func getDeviceState(token string, device_id string, capability_type string) (Sta
 }
 
 func changeDeviceState(token string, device_id string, action ActionRequest) (StateResponse, error) {
-	base_url, _ := url.ParseRequestURI(device_api_url)
+	base_url, _ := url.ParseRequestURI(DEVICE_API_URL)
 	body := ChangeDevicesStateRequest{
 		Devices: []ChangeDeviceStateRequest{{
 			ID:      device_id,
@@ -76,7 +73,7 @@ func changeDeviceState(token string, device_id string, action ActionRequest) (St
 	if err != nil {
 		return StateResponse{}, fmt.Errorf("error parsing body: %s", err)
 	}
-	if resp.Status != "ok" || len(resp.Devices) == 0 ||
+	if len(resp.Devices) == 0 ||
 		len(resp.Devices[0].Capabilities) == 0 ||
 		resp.Devices[0].Capabilities[0].State.ActionResult.Status != "DONE" {
 		return StateResponse{}, fmt.Errorf("unknown error")

@@ -5,8 +5,8 @@ import (
 	"net/http"
 )
 
+// /health
 func healthHandler(w http.ResponseWriter, r *http.Request) {
-	// Check the health of the server and return a status code accordingly
 	if serverIsHealthy() {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "Server is healthy")
@@ -17,7 +17,5 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func serverIsHealthy() bool {
-	// Check the health of the server and return true or false accordingly
-	// For example, check if the server can connect to the database
 	return true
 }
